@@ -1,13 +1,7 @@
 <?php
 
-/*
- | Documentation content is data, not executable PHP.
- | Code examples are kept in single-quoted strings or assembled from arrays
- | so variables such as $update, $id and $keyboard are rendered literally.
- */
-
+// Documentation is data. Code samples must never be interpreted as PHP while this config is loaded.
 $code = static fn (array $lines): string => implode("\n", $lines);
-
 $pages = [];
 
 $add = static function (string $slug, string $title, string $subtitle, array $blocks = []) use (&$pages): void {
@@ -164,7 +158,8 @@ $add('routing/middleware', 'Middleware', 'Authorization, throttling and cross-cu
     ])],
 ]);
 
-$add('bot-modes/webhook', 'Webhook Mode', 'Let Telegram push updates to Laravel.', [
+$add('bot-modes/webhook', 'Webhook Mode', 'Let Telegram push updates to your Laravel application.', [
+    ['t' => 'p', 'text' => 'In webhook mode Telegram sends an HTTP POST to the configured Laravel webhook route.'],
     ['t' => 'code', 'lang' => 'bash', 'code' => 'php artisan reyhan:setWebhookRoute'],
     ['t' => 'code', 'lang' => 'env', 'code' => "TELEGRAM_MODE=webhook\nTELEGRAM_WEBHOOK_PATH=/telegram/webhook"],
 ]);
@@ -175,37 +170,24 @@ $add('bot-modes/polling', 'Polling Mode', 'Pull updates with long polling.', [
 ]);
 
 $add('bot-modes/webhook-vs-polling', 'Webhook vs Polling', 'Choose the transport that fits your environment.', [
-    ['t' => 'table', 'head' => ['Aspect', 'Webhook', 'Polling'], 'rows' => [['HTTPS', 'Required', 'Not required'], ['Local development', 'Needs public endpoint', 'Works directly'], ['Production', 'Recommended', 'Use with a process manager'], ['Routes', 'Same route table', 'Same route table']]],
+    ['t' => 'table', 'head' => ['Aspect', 'Webhook', 'Polling'], 'rows' => [['HTTPS', 'Required', 'Not required'], ['Local development', 'Needs public endpoint', 'Works directly'], ['Production', 'Recommended', 'Use with process manager'], ['Routes', 'Same route table', 'Same route table']]],
 ]);
 
 $add('keyboard/overview', 'Keyboard Overview', 'Build Telegram reply and inline keyboards.', [
     ['t' => 'p', 'text' => 'The Keyboard API provides reusable builders for Telegram reply and inline keyboards.'],
 ]);
-
 $add('keyboard/reply-keyboard', 'Reply Keyboard', 'Build keyboards that appear as Telegram reply options.', [
-    ['t' => 'code', 'lang' => 'php', 'code' => $code([
-        '$keyboard = Keyboard::make()',
-        "    ->button('Menu')",
-        "    ->button('Help');",
-    ])],
+    ['t' => 'code', 'lang' => 'php', 'code' => $code(['$keyboard = Keyboard::make()', "    ->button('Menu')", "    ->button('Help');"])],
 ]);
-
 $add('keyboard/inline-keyboard', 'Inline Keyboard', 'Build keyboards attached to messages.', [
-    ['t' => 'code', 'lang' => 'php', 'code' => $code([
-        '$keyboard = Keyboard::make()',
-        "    ->button('Open', url: $url)",
-        "    ->button('Cancel', callbackData: 'order:{$id}:cancel');",
-    ])],
+    ['t' => 'code', 'lang' => 'php', 'code' => $code(['$keyboard = Keyboard::make()', "    ->button('Open', url: 'https://example.com')", "    ->button('Cancel', callbackData: 'order:{id}:cancel');"])],
 ]);
-
 $add('keyboard/buttons', 'Buttons', 'Configure button labels, URLs and callback data.', [
     ['t' => 'p', 'text' => 'Buttons can represent normal reply choices, URLs or callback actions depending on the keyboard type.'],
 ]);
-
 $add('keyboard/callback-data', 'Callback Data', 'Connect inline keyboard actions to callback routes.', [
     ['t' => 'code', 'lang' => 'php', 'code' => "Route::onCallback('order:{id}:cancel', [OrderController::class, 'cancel']);"],
 ]);
-
 $add('keyboard/reusable-patterns', 'Reusable Keyboard Patterns', 'Keep frequently used keyboard layouts reusable.', [
     ['t' => 'p', 'text' => 'Create keyboard factories or application services for repeated layouts instead of duplicating button definitions in controllers.'],
 ]);
@@ -213,45 +195,35 @@ $add('keyboard/reusable-patterns', 'Reusable Keyboard Patterns', 'Keep frequentl
 $add('telegram/telegram-api', 'Telegram API', 'Access Telegram Bot API methods through the package client.', [
     ['t' => 'p', 'text' => 'The package exposes a developer-friendly Telegram API layer while keeping routing and application logic separate.'],
 ]);
-
 $add('telegram/response-api', 'Response API', 'Describe outgoing Telegram actions from route handlers.', [
-    ['t' => 'code', 'lang' => 'php', 'code' => $code([
-        "return Response::text('Hello');",
-        '',
-        'return Response::photo($file);',
-    ])],
+    ['t' => 'code', 'lang' => 'php', 'code' => $code(["return Response::text('Hello');", '', 'return Response::photo($file);'])],
 ]);
 
 $add('queue/queue', 'Queue', 'Process Telegram updates asynchronously with Laravel queues.', [
     ['t' => 'code', 'lang' => 'env', 'code' => "TELEGRAM_QUEUE_CONNECTION=database\nTELEGRAM_QUEUE_NAME=telegram"],
 ]);
-
 $add('queue/rate-limiting', 'Rate Limiting', 'Control outgoing Telegram API traffic per user, chat or command.', [
     ['t' => 'list', 'items' => ['Per-user limits', 'Per-chat limits', 'Per-command limits', 'Laravel Cache and RateLimiter integration', 'Configurable limits and backoff']],
 ]);
 
-$testingPages = [
+foreach ([
     'testing/unit' => ['Unit Testing', 'Test isolated routing and support classes.'],
     'testing/feature' => ['Feature Testing', 'Test complete Laravel integration flows.'],
     'testing/routing' => ['Routing Tests', 'Verify commands, messages, callbacks and parameters.'],
     'testing/telegram' => ['Telegram Tests', 'Test Telegram update handling and API integration.'],
     'testing/api' => ['API Tests', 'Test Telegram API client and response behaviour.'],
-];
-foreach ($testingPages as $slug => [$title, $subtitle]) {
-    $add($slug, $title, $subtitle, [
-        ['t' => 'p', 'text' => 'Keep automated tests close to the behaviour they verify. Use fake or test transports where possible and reserve real Telegram API calls for explicit smoke tests.'],
-    ]);
+] as $slug => [$title, $subtitle]) {
+    $add($slug, $title, $subtitle, [['t' => 'p', 'text' => 'Keep automated tests close to the behaviour they verify. Use fake or test transports where possible and reserve real Telegram API calls for explicit smoke tests.']]);
 }
 
 $add('configuration/configuration', 'Configuration', 'Configure the bot, transport, queues and rate limits.', [
     ['t' => 'code', 'lang' => 'env', 'code' => "TELEGRAM_BOT_TOKEN=123456:AA...\nTELEGRAM_MODE=webhook\nTELEGRAM_WEBHOOK_PATH=/telegram/webhook"],
 ]);
-
 $add('configuration/security', 'Security', 'Protect bot tokens, webhook endpoints and privileged routes.', [
     ['t' => 'list', 'items' => ['Never commit the bot token.', 'Validate webhook requests in production.', 'Protect administrator routes with middleware.', 'Apply rate limits to sensitive commands.']],
 ]);
 
-$examplePages = [
+foreach ([
     'examples/simple-bot' => ['Simple Bot', 'A minimal Telegram bot using routes and a controller.'],
     'examples/start-command' => ['Start Command', 'Handle /start with a controller.'],
     'examples/echo-bot' => ['Echo Bot', 'Route incoming text to an echo handler.'],
@@ -259,23 +231,17 @@ $examplePages = [
     'examples/callback-bot' => ['Callback Bot', 'Route callback data to a controller method.'],
     'examples/admin-commands' => ['Admin Commands', 'Protect administrator commands with middleware.'],
     'examples/queue-bot' => ['Queue-based Bot', 'Process updates asynchronously with Laravel queues.'],
-];
-foreach ($examplePages as $slug => [$title, $subtitle]) {
-    $add($slug, $title, $subtitle, [
-        ['t' => 'p', 'text' => 'This example follows the package architecture: define the Telegram route in routes/bot.php, keep application logic in a controller, and return a Telegram Response.'],
-    ]);
+] as $slug => [$title, $subtitle]) {
+    $add($slug, $title, $subtitle, [['t' => 'p', 'text' => 'This example follows the package architecture: define the Telegram route in routes/bot.php, keep application logic in a controller, and return a Telegram Response.']]);
 }
 
-$apiPages = [
+foreach ([
     'api/route-api' => ['Route API', 'Reference for Telegram route definitions.'],
     'api/keyboard-api' => ['Keyboard API', 'Reference for keyboard builders and buttons.'],
     'api/response-api' => ['Response API', 'Reference for outgoing Telegram responses.'],
     'api/telegram-api' => ['Telegram API Reference', 'Client methods and error handling.'],
-];
-foreach ($apiPages as $slug => [$title, $subtitle]) {
-    $add($slug, $title, $subtitle, [
-        ['t' => 'p', 'text' => 'Use the package API directly from your Laravel application while keeping transport and routing concerns separated.'],
-    ]);
+] as $slug => [$title, $subtitle]) {
+    $add($slug, $title, $subtitle, [['t' => 'p', 'text' => 'Use the package API directly from your Laravel application while keeping transport and routing concerns separated.']]);
 }
 
 foreach ([
@@ -284,9 +250,7 @@ foreach ([
     'troubleshooting' => ['Troubleshooting', 'Common setup and runtime problems.'],
     'contributing' => ['Contributing', 'How to contribute to the package.'],
 ] as $slug => [$title, $subtitle]) {
-    $add($slug, $title, $subtitle, [
-        ['t' => 'p', 'text' => 'See the repository history and project contribution guidelines for the latest details.'],
-    ]);
+    $add($slug, $title, $subtitle, [['t' => 'p', 'text' => 'See the repository history and project contribution guidelines for the latest details.']]);
 }
 
 $navigation = [
@@ -299,8 +263,8 @@ $navigation = [
     'Queue & Rate Limiting' => ['queue/queue', 'queue/rate-limiting'],
     'Testing' => ['testing/unit', 'testing/feature', 'testing/routing', 'testing/telegram', 'testing/api'],
     'Configuration & Security' => ['configuration/configuration', 'configuration/security'],
-    'Examples' => array_keys($examplePages),
-    'API Reference' => array_keys($apiPages),
+    'Examples' => ['examples/simple-bot', 'examples/start-command', 'examples/echo-bot', 'examples/inline-keyboard', 'examples/callback-bot', 'examples/admin-commands', 'examples/queue-bot'],
+    'API Reference' => ['api/route-api', 'api/keyboard-api', 'api/response-api', 'api/telegram-api'],
     'More' => ['changelog', 'faq', 'troubleshooting', 'contributing'],
 ];
 
