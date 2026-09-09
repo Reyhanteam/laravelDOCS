@@ -3,6 +3,7 @@
 // Documentation is data. Code samples must never be interpreted as PHP while this config is loaded.
 $code = static fn (array $lines): string => implode("\n", $lines);
 $pages = [];
+$id = '{$id}';
 
 $add = static function (string $slug, string $title, string $subtitle, array $blocks = []) use (&$pages): void {
     $pages[$slug] = [
